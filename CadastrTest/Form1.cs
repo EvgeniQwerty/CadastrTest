@@ -14,12 +14,12 @@ using System.Xml.Linq;
 
 namespace CadastrTest
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
 
         private Dictionary<TreeNode, string> contentOfNodes = new Dictionary<TreeNode, string>(); //словарь для хранения содержимого нод
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -272,5 +272,6 @@ namespace CadastrTest
                 MessageBox.Show("Не выбрана нода для сохранения!");
             }
         }
+
     }
 }

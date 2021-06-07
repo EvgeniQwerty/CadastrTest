@@ -1,7 +1,7 @@
 ﻿
 namespace CadastrTest
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -64,21 +64,21 @@ namespace CadastrTest
             // openXMLToolStripMenuItem
             // 
             this.openXMLToolStripMenuItem.Name = "openXMLToolStripMenuItem";
-            this.openXMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openXMLToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.openXMLToolStripMenuItem.Text = "Open XML...";
             this.openXMLToolStripMenuItem.Click += new System.EventHandler(this.openXMLToolStripMenuItem_Click);
             // 
             // saveXMLToolStripMenuItem
             // 
             this.saveXMLToolStripMenuItem.Name = "saveXMLToolStripMenuItem";
-            this.saveXMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveXMLToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.saveXMLToolStripMenuItem.Text = "Save XML...";
             this.saveXMLToolStripMenuItem.Click += new System.EventHandler(this.saveXMLToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -104,7 +104,7 @@ namespace CadastrTest
             this.richTextBox1.TabIndex = 2;
             this.richTextBox1.Text = "";
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -113,7 +113,7 @@ namespace CadastrTest
             this.Controls.Add(this.treeView1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "Cadastr";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

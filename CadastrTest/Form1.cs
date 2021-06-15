@@ -20,7 +20,7 @@ namespace CadastrTest
         private Dictionary<TreeNode, string> contentOfNodes = new Dictionary<TreeNode, string>(); //словарь для хранения содержимого нод
         private TreeNode landRecords, buildRecords, constructionRecords, spatialData, municipalBoundaries, zones;
 
-        private string FormatXml(string xml)
+        private string FormatXml(string xml) //преттифайер для загрузки в файл
         {
             try
             {
@@ -43,7 +43,7 @@ namespace CadastrTest
             {
                 try
                 {
-                    string xml = contentOfNodes[treeView1.SelectedNode];
+                    string xml = contentOfNodes[treeView1.SelectedNode]; //вылетим с ошибкой, если в словаре нет такой ноды
                     saveFileDialog1.CreatePrompt = true;
                     saveFileDialog1.OverwritePrompt = true;
                     saveFileDialog1.FileName = "cadastr";
@@ -67,7 +67,7 @@ namespace CadastrTest
             }
         }
 
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e) //обработчик дозагрузки содержимого ноды
         {
             TreeNode selectedNode = treeView1.SelectedNode;
             if (selectedNode.Nodes.Count == 0)
@@ -103,10 +103,8 @@ namespace CadastrTest
                 xDoc.Load(openFileDialog1.FileName);
                 XmlElement xRoot = xDoc.DocumentElement;
 
-                //считываем xml без пустых нод
-
-                treeView1.Nodes.Clear(); //очистка перед загрузкой
-                                         //инициализация переменных
+                treeView1.Nodes.Clear();
+                                         
                 landRecords = treeView1.Nodes.Add("land_records");
                 buildRecords = treeView1.Nodes.Add("build_records");
                 constructionRecords = treeView1.Nodes.Add("construction_records");
@@ -114,11 +112,12 @@ namespace CadastrTest
                 municipalBoundaries = treeView1.Nodes.Add("municipal_boundaries");
                 zones = treeView1.Nodes.Add("zones_and_territories_boundaries");
 
+                //проверка, если загружаем ранее выгруженный файл
                 if (xDoc.DocumentElement.Name == "land_record" || xDoc.DocumentElement.Name == "build_record" || xDoc.DocumentElement.Name == "construction_record" || xDoc.DocumentElement.Name == "entity_spatial" || xDoc.DocumentElement.Name == "municipal_boundary_record" || xDoc.DocumentElement.Name == "zones_and_territories_record")
                 {
                     FindTag(xDoc);
                 }
-                else
+                else //иначе загружаем стандартный файл
                 {
                     foreach (XmlNode node in xDoc.DocumentElement.ChildNodes)
                     {
@@ -132,6 +131,7 @@ namespace CadastrTest
             }
         }
 
+        //основная процедура создания нод. Поддерживает рекурсию (используется при дозагрузке)
         private void AddNode(TreeNodeCollection nodes, XmlNode inXmlNode, bool recursion = false)
         {
             if (inXmlNode.HasChildNodes)
@@ -142,7 +142,7 @@ namespace CadastrTest
 
                 if (text == "land_record" || text == "build_record" || text == "construction_record" || text == "entity_spatial" || text == "municipal_boundary_record" || text == "zones_and_territories_record")
                 {
-                    contentOfNodes.Add(newNode, "<" + text + ">" + inXmlNode.InnerXml + "</" + text + ">");
+                    contentOfNodes.Add(newNode, "<" + text + ">" + inXmlNode.InnerXml + "</" + text + ">"); //заполняем словарь, чтобы был быстрый доступ к xml и мы могли легко его сохранить
 
                     XmlNode cadNode = inXmlNode.SelectSingleNode(".//" + "cad_number");
                     if (cadNode != null)
@@ -168,6 +168,7 @@ namespace CadastrTest
 
                 }
 
+                //для дозагрузки иерархии с помощью рекурсии
                 if (recursion)
                 {
                     XmlNodeList nodeList = inXmlNode.ChildNodes;
@@ -185,6 +186,7 @@ namespace CadastrTest
             }
         }
 
+        //процедура поиска основных тегов
         private void FindTag(XmlNode fatherNode)
         {
             if (fatherNode.HasChildNodes)

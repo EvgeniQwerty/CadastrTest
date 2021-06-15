@@ -84,6 +84,7 @@ namespace CadastrTest
                             XmlNode xRoot = xDoc.DocumentElement.ChildNodes[0];
                             AddNode(selectedNode.Nodes, xRoot, true);
                         }
+                        selectedNode.Expand();
                     }
                 }
                 catch { }

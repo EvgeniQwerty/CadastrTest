@@ -18,194 +18,8 @@ namespace CadastrTest
     {
 
         private Dictionary<TreeNode, string> contentOfNodes = new Dictionary<TreeNode, string>(); //словарь для хранения содержимого нод
+        private TreeNode landRecords, buildRecords, constructionRecords, spatialData, municipalBoundaries, zones;
 
-        public MainForm()
-        {
-            InitializeComponent();
-        }
-
-        private void openXMLToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-             if (openFileDialog1.ShowDialog() == DialogResult.OK)
-             {
-                try
-                {
-                    //как только попадаем в головную ноду, начинаем запись стринга. Как только попадаем в его закрывающую часть, заканчиваем писать в стринг. Ещё делаем привязку к ноде (с помощью словаря)
-                    var sr = new StreamReader(openFileDialog1.FileName);
-                    XmlReaderSettings settings = new XmlReaderSettings();
-                    settings.Async = false; //без асинхронной загрузки/чтения
-                    XmlReader reader = XmlReader.Create(sr, settings);
-                    TreeNode addedNode, prevNode, landRecords, buildRecords, constructionRecords, spatialData, municipalBoundaries, zones;
-                    bool foundCadNumber = false; //переменная для идентификации тэга-идентификатора (cad_number, sk_id, reg_numb_border)
-                    string textXml = ""; //переменная, в которую записывается xml, для последующего показа в расшифровке (отправляется в словарь contentOfNodes)
-                    bool isSk_id = false; //переменная для идентификации, является ли тэг sk_id идентификатором или нет
-                    string prevTag = "land_record"; //переменная для сохранения предыдушего тэга
-                    bool isRightES = false; //переменная для идентификации, является ли тэг entity_spatial идентификатором или нет
-
-                    try
-                    {
-                        //считываем xml без пустых нод
-
-                        treeView1.Nodes.Clear(); //очистка перед загрузкой
-                        //инициализация переменных
-                        landRecords = treeView1.Nodes.Add("land_records");
-                        buildRecords = treeView1.Nodes.Add("build_records");
-                        constructionRecords = treeView1.Nodes.Add("construction_records");
-                        spatialData = treeView1.Nodes.Add("spatial_data");
-                        municipalBoundaries = treeView1.Nodes.Add("municipal_boundaries");
-                        zones = treeView1.Nodes.Add("zones_and_territories_boundaries");
-                        prevNode = landRecords;
-                        addedNode = landRecords;
-
-                        //цикл считывания
-                        while (reader.Read())
-                        {
-                            //свитч на тип ноды (открывающий тэг, текст, закрывающий тэг)
-                            switch (reader.NodeType)
-                            {
-                                case XmlNodeType.Element:
-                                    switch (reader.Name)
-                                    {
-                                        case "land_record":
-                                            prevNode = landRecords;
-                                            textXml = "<" + reader.Name + ">";
-                                            break;
-                                        case "cad_number":
-                                            if (prevTag != "common_land_cad_number")
-                                            {
-                                                foundCadNumber = true;
-                                            }
-                                            textXml += "<" + reader.Name + ">";
-                                            break;
-                                        case "build_record":
-                                            prevNode = buildRecords;
-                                            textXml = "<" + reader.Name + ">";
-                                            break;
-                                        case "construction_record":
-                                            prevNode = constructionRecords;
-                                            textXml = "<" + reader.Name + ">";
-                                            break;
-                                        case "entity_spatial":
-                                            if (prevTag != "contour" && prevTag != "number_pp")
-                                            {
-                                                prevNode = spatialData;
-                                                textXml = "<" + reader.Name + ">";
-                                                isRightES = true;
-                                            }
-                                            else
-                                            {
-                                                textXml += "<" + reader.Name + ">";
-                                                isRightES = false;
-                                            }
-                                            break;
-                                        case "sk_id":
-                                            isSk_id = true;
-                                            foundCadNumber = true;
-                                            textXml += "<" + reader.Name + ">";
-                                            break;
-                                        case "municipal_boundary_record":
-                                            prevNode = municipalBoundaries;
-                                            textXml = "<" + reader.Name + ">";
-                                            break;
-                                        case "reg_numb_border":
-                                            textXml += "<" + reader.Name + ">";
-                                            foundCadNumber = true;
-                                            break;
-                                        case "zones_and_territories_record":
-                                            prevNode = zones;
-                                            textXml = "<" + reader.Name + ">";
-                                            break;
-                                        default:
-                                            textXml += "<" + reader.Name + ">";
-                                            break;
-                                    }
-                                    prevTag = reader.Name;
-                                    break;
-                                case XmlNodeType.Text:
-                                    textXml += reader.Value;
-
-                                    if (isSk_id)
-                                    {
-                                        try
-                                        {
-                                            float value = float.Parse(reader.Value.Replace('.', ','));
-                                        }
-                                        catch
-                                        {
-                                            foundCadNumber = false;
-                                        }
-                                        finally
-                                        {
-                                            isSk_id = false;
-                                        }
-                                    }
-
-                                    if (foundCadNumber)
-                                    {
-                                        foundCadNumber = false;
-                                        addedNode = prevNode.Nodes.Add(reader.Value);
-                                    }
-                                    break;
-                                case XmlNodeType.EndElement:
-                                switch (reader.Name)
-                                {
-                                    case "land_record":
-                                        textXml += "</" + reader.Name + ">";
-                                        contentOfNodes.Add(addedNode, textXml);
-                                        break;
-                                    case "build_record":
-                                        textXml += "</" + reader.Name + ">";
-                                        contentOfNodes.Add(addedNode, textXml);
-                                        break;
-                                    case "construction_record":
-                                        textXml += "</" + reader.Name + ">";
-                                        contentOfNodes.Add(addedNode, textXml);
-                                        break;
-                                    case "entity_spatial":
-                                        textXml += "</" + reader.Name + ">";
-                                        if (isRightES)
-                                        { 
-                                            contentOfNodes.Add(addedNode, textXml);
-                                        }
-                                        isRightES = false;
-                                        break;
-                                    case "municipal_boundary_record": 
-                                        textXml += "</" + reader.Name + ">";
-                                        contentOfNodes.Add(addedNode, textXml);
-                                        break;
-                                    case "zones_and_territories_record": 
-                                        textXml += "</" + reader.Name + ">";
-                                        contentOfNodes.Add(addedNode, textXml);
-                                        break;
-                                    default:
-                                        textXml += "</" + reader.Name + ">";
-                                        break;
-                                }
-                                break;
-
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Ошибка при загрузке файла!");
-                    }
-                    finally
-                    {
-                        //закрываем считывание
-                        if (reader != null)
-                            reader.Close();
-                    }
-                }
-                catch (SecurityException ex)
-                {
-                    MessageBox.Show($"Ошибка доступа.\n\nСообщение об ошибке: {ex.Message}\n\n" +
-                    $"Детали:\n\n{ex.StackTrace}");
-                }
-            }
-        }
-
-        //функция для красивого вывода xml с отступами
         private string FormatXml(string xml)
         {
             try
@@ -219,58 +33,199 @@ namespace CadastrTest
             }
         }
 
-        private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void saveXMLToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+            if (treeView1.Nodes.Count == 0)
             {
-                //выбираем ноду с фокусом. Ищем её в словаре. Если находим, в текстбокс выводим данные.
-                TreeView selectedNode = (TreeView)sender;
-                string result = contentOfNodes[selectedNode.SelectedNode];
-                richTextBox1.Text = FormatXml(result);
+                MessageBox.Show("Не загружен основной файл!");
             }
-            catch
+            else
             {
-                richTextBox1.Text = "";
-            }
+                try
+                {
+                    string xml = contentOfNodes[treeView1.SelectedNode];
+                    saveFileDialog1.CreatePrompt = true;
+                    saveFileDialog1.OverwritePrompt = true;
+                    saveFileDialog1.FileName = "cadastr";
+                    saveFileDialog1.DefaultExt = "xml";
+                    saveFileDialog1.Filter =
+                        "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                    saveFileDialog1.InitialDirectory =
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    DialogResult result = saveFileDialog1.ShowDialog();
 
+                    if (result == DialogResult.OK)
+                    {
+                        string savedXml = FormatXml(xml);
+                        File.WriteAllText(saveFileDialog1.FileName, savedXml, Encoding.GetEncoding("utf-8"));
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Выбрана нода, недоступная для сохранения!");
+                }
+            }
+        }
+
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            TreeNode selectedNode = treeView1.SelectedNode;
+            if (selectedNode.Nodes.Count == 0)
+            {
+                try
+                {
+                    string savedXml = contentOfNodes[selectedNode];
+                    if (savedXml != null)
+                    {
+                        XmlDocument xDoc = new XmlDocument();
+                        xDoc.LoadXml(savedXml);
+                        if (xDoc.DocumentElement.ChildNodes.Count > 0)
+                        {
+                            XmlNode xRoot = xDoc.DocumentElement.ChildNodes[0];
+                            AddNode(selectedNode.Nodes, xRoot, true);
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        public MainForm()
+        {
+            InitializeComponent();
+        }
+
+        private void openXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                XmlDocument xDoc = new XmlDocument();
+                xDoc.Load(openFileDialog1.FileName);
+                XmlElement xRoot = xDoc.DocumentElement;
+
+                //считываем xml без пустых нод
+
+                treeView1.Nodes.Clear(); //очистка перед загрузкой
+                                         //инициализация переменных
+                landRecords = treeView1.Nodes.Add("land_records");
+                buildRecords = treeView1.Nodes.Add("build_records");
+                constructionRecords = treeView1.Nodes.Add("construction_records");
+                spatialData = treeView1.Nodes.Add("spatial_data");
+                municipalBoundaries = treeView1.Nodes.Add("municipal_boundaries");
+                zones = treeView1.Nodes.Add("zones_and_territories_boundaries");
+
+                if (xDoc.DocumentElement.Name == "land_record" || xDoc.DocumentElement.Name == "build_record" || xDoc.DocumentElement.Name == "construction_record" || xDoc.DocumentElement.Name == "entity_spatial" || xDoc.DocumentElement.Name == "municipal_boundary_record" || xDoc.DocumentElement.Name == "zones_and_territories_record")
+                {
+                    FindTag(xDoc);
+                }
+                else
+                {
+                    foreach (XmlNode node in xDoc.DocumentElement.ChildNodes)
+                    {
+                        if (node.Name == "cadastral_blocks")
+                        {
+                            FindTag(node);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        private void AddNode(TreeNodeCollection nodes, XmlNode inXmlNode, bool recursion = false)
+        {
+            if (inXmlNode.HasChildNodes)
+            {
+                string text = inXmlNode.Name;
+                
+                TreeNode newNode = nodes.Add(text);
+
+                if (text == "land_record" || text == "build_record" || text == "construction_record" || text == "entity_spatial" || text == "municipal_boundary_record" || text == "zones_and_territories_record")
+                {
+                    contentOfNodes.Add(newNode, "<" + text + ">" + inXmlNode.InnerXml + "</" + text + ">");
+
+                    XmlNode cadNode = inXmlNode.SelectSingleNode(".//" + "cad_number");
+                    if (cadNode != null)
+                    {
+                        newNode.Text = cadNode.InnerText;
+                    }
+                    else
+                    {
+                        cadNode = inXmlNode.SelectSingleNode(".//" + "reg_numb_border");
+                        if (cadNode != null)
+                        {
+                            newNode.Text = cadNode.InnerText;
+                        }
+                        else
+                        {
+                            cadNode = inXmlNode.SelectSingleNode(".//" + "sk_id");
+                            if (cadNode != null)
+                            {
+                                newNode.Text = cadNode.InnerText;
+                            }
+                        }
+                    }   
+
+                }
+
+                if (recursion)
+                {
+                    XmlNodeList nodeList = inXmlNode.ChildNodes;
+                    for (int i = 0; i <= nodeList.Count - 1; i++)
+                    {
+                        XmlNode xNode = inXmlNode.ChildNodes[i];
+                        AddNode(newNode.Nodes, xNode, true);
+                    }
+                }
+            }
+            else
+            {
+                string text = (inXmlNode.OuterXml).Trim();
+                TreeNode newNode = nodes.Add(text);
+            }
+        }
+
+        private void FindTag(XmlNode fatherNode)
+        {
+            if (fatherNode.HasChildNodes)
+            {
+                foreach (XmlNode node in fatherNode.ChildNodes)
+                {
+                    if (node.Name == "land_record")
+                    {
+                        AddNode(landRecords.Nodes, node);
+                    }
+                    else if (node.Name == "build_record")
+                    {
+                        AddNode(buildRecords.Nodes, node);
+                    }
+                    else if (node.Name == "construction_record")
+                    {
+                        AddNode(constructionRecords.Nodes, node);
+                    }
+                    else if (node.Name == "entity_spatial")
+                    {
+                        AddNode(spatialData.Nodes, node);
+                    }
+                    else if (node.Name == "municipal_boundary_record")
+                    {
+                        AddNode(municipalBoundaries.Nodes, node);
+                    }
+                    else if (node.Name == "zones_and_territories_record")
+                    {
+                        AddNode(zones.Nodes, node);
+                    }
+                    else
+                    {
+                        FindTag(node);
+                    }
+                }
+            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-        private void saveXMLToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (richTextBox1.Text.Length > 0)
-            {
-
-                saveFileDialog1.CreatePrompt = true;
-                saveFileDialog1.OverwritePrompt = true;
-                saveFileDialog1.FileName = "cadastr";
-                saveFileDialog1.DefaultExt = "xml";
-                saveFileDialog1.Filter =
-                    "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-                saveFileDialog1.InitialDirectory =
-                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                DialogResult result = saveFileDialog1.ShowDialog();
-
-                if (saveFileDialog1.FileName.Length == 0)
-                {
-                    MessageBox.Show("Заполните имя файла!");
-                }
-
-                else if (result == DialogResult.OK)
-                {
-                    string[] arr_text = richTextBox1.Lines;
-                    //richTextBox1.SaveFile(saveFileDialog1.FileName, RichTextBoxStreamType.PlainText);
-                    File.WriteAllLines(saveFileDialog1.FileName, arr_text, Encoding.GetEncoding("utf-8"));
-                }
-            }
-            else
-            {
-                MessageBox.Show("Не выбрана нода для сохранения!");
-            }
         }
 
     }

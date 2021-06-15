@@ -37,7 +37,6 @@ namespace CadastrTest
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -84,33 +83,24 @@ namespace CadastrTest
             // 
             // treeView1
             // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.treeView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.treeView1.Location = new System.Drawing.Point(0, 24);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(390, 426);
+            this.treeView1.Size = new System.Drawing.Size(800, 426);
             this.treeView1.TabIndex = 1;
-            this.treeView1.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseDoubleClick);
+            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(390, 24);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(410, 426);
-            this.richTextBox1.TabIndex = 2;
-            this.richTextBox1.Text = "";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.treeView1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -133,7 +123,6 @@ namespace CadastrTest
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
-        private System.Windows.Forms.RichTextBox richTextBox1;
     }
 }
 

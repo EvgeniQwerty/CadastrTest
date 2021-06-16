@@ -79,12 +79,11 @@ namespace CadastrTest
                     {
                         XmlDocument xDoc = new XmlDocument();
                         xDoc.LoadXml(savedXml);
-                        if (xDoc.DocumentElement.ChildNodes.Count > 0)
+                        
+                        foreach (XmlNode child in xDoc.DocumentElement.ChildNodes)
                         {
-                            XmlNode xRoot = xDoc.DocumentElement.ChildNodes[0];
-                            AddNode(selectedNode.Nodes, xRoot, true);
+                            AddNode(selectedNode.Nodes, child, true);
                         }
-                        selectedNode.Expand();
                     }
                 }
                 catch { }
